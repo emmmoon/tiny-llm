@@ -41,5 +41,23 @@ class RoPE:
         if self.traditional:
             x1 = x[..., ::2]
             x2 = x[..., 1::2]
+        else:
+            x1 = x[..., : self.dims // 2]
+            x2 = x[..., self.dims // 2 :]
+        
+        cos_basis = cos_basis.reshape(1, L, 1, self.dims // 2)
+        sin_basis = sin_basis.reshape(1, L, 1, self.dims // 2)
+        real = mx.multiply(x1, cos_basis) - mx.multiply(x2, sin_basis)
+        imag = mx.multiply(x2, cos_basis) + mx.multiply(x1, sin_basis)
+        if self.traditional:
+            y = mx.stack([real, imag], axis=-1)
+            y = y.reshape(N, L, H, D)
+        else:
+            y = mx.concat([real, imag], axis=-1)
+            y = y.reshape(N, L, H, D)
+        
+        return y.astype(x.dtype)
+
+
 
         
