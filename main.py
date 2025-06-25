@@ -6,7 +6,7 @@ import argparse
 import mlx_lm.sample_utils
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="Qwen/Qwen2-7B-Instruct-MLX")
+parser.add_argument("--model", type=str, default="Qwen/Qwen2-0.5B-Instruct-MLX")
 parser.add_argument(
     "--prompt",
     type=str,

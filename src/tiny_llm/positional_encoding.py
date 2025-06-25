@@ -1,3 +1,4 @@
+import math
 import mlx.core as mx
 
 
@@ -9,9 +10,36 @@ class RoPE:
         base: int = 10000,
         traditional: bool = False,
     ):
-        pass
+        assert dims % 2 == 0, "dims must be even"
+        self.dims = dims
+        self.seq_len = seq_len
+        half_dims = dims // 2
+        position = mx.arange(0, seq_len)
+        freqs = mx.exp(
+            -mx.arange(0.0, half_dims) * (math.log(base) / half_dims)
+        )
+        freqs = mx.outer(position, freqs)
+        self.cos_freqs = mx.cos(freqs)
+        self.sin_freqs = mx.sin(freqs)
+        self.base = base
+        self.traditional = traditional
 
     def __call__(
         self, x: mx.array, offset: list[slice] | slice | None = None
     ) -> mx.array:
-        pass
+        N, L, H, D = x.shape
+        if offset is not None:
+            if isinstance(offset, slice):
+                assert offset.stop - offset.start == L, f"offset must be of length {L}"
+        
+        cos_basis = (
+            self.cos_freqs[:L, :] if offset is None else self.cos_freqs[offset, :]
+        )
+        sin_basis = (
+            self.sin_freqs[:L, :] if offset is None else self.sin_freqs[offset, :]
+        )
+        if self.traditional:
+            x1 = x[..., ::2]
+            x2 = x[..., 1::2]
+
+        
