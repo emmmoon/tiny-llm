@@ -27,6 +27,7 @@ class RoPE:
     def __call__(
         self, x: mx.array, offset: list[slice] | slice | None = None
     ) -> mx.array:
+        # doesn't change shape
         N, L, H, D = x.shape
         if offset is not None:
             if isinstance(offset, slice):
