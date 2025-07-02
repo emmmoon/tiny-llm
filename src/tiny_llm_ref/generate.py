@@ -26,7 +26,7 @@ def simple_generate(
 
     # prefill with the prompt
     tokens = mx.array(tokenizer.encode(prompt, add_special_tokens=False))
-    detokenizer = tokenizer.detokenizer
+    detokenizer = tokenizer._detokenizer
     detokenizer.reset()
     # generate/decode
     while True:
