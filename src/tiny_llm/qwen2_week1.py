@@ -57,8 +57,8 @@ class Qwen2MultiHeadAttention:
             linear(x, self.wv, self.bv)
             .reshape(B, L, self.num_kv_heads, self.head_dim)
         )
-        q = self.rope(q, slice(offset, offset + L))
-        k = self.rope(k, slice(offset, offset + L))
+        q = self.rope(q, offset=slice(0, L))
+        k = self.rope(k, offset=slice(0, L))
         q = q.transpose(0, 2, 1, 3)  # B, H_q, L, D
         k = k.transpose(0, 2, 1, 3)
         v = v.transpose(0, 2, 1, 3)
@@ -159,7 +159,7 @@ class Qwen2TransformerBlock:
         x: mx.array,
         mask: mx.array | str | None = None,
     ) -> mx.array:
-        r = self.self_attn(self.input_layernorm(x), offset, mask)
+        r = self.self_attn(self.input_layernorm(x), mask)
         h = x + r
         r = self.mlp(self.post_attention_layernorm(h))
         out = h + r
@@ -225,7 +225,7 @@ class Qwen2ModelWeek1:
         h = self.embeding(inputs)
         for layer in range(self.mlx_model.args.num_hidden_layers):
             h = self.inner_layers[layer](
-                h, offset, mask="causal" if h.shape[1] > 1 else None)
+                h, mask="causal" if h.shape[1] > 1 else None)
         h = self.norm(h)
         if self.w_lm_head is not None:
             return linear(h, self.w_lm_head)
